@@ -1,0 +1,36 @@
+@use "constants.scss" as constants;
+
+nav {
+  padding: 1em;
+  background-color: constants.$darkestPurple;
+
+  /* flexbox */
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+a {
+  background-color: constants.$purple;
+  border-radius: 2px;
+  padding: 1rem;
+  font-size: 1.2rem;
+  text-decoration: none;
+  display: inline-block;
+  color: #fff;
+  text-align: center;
+  min-width: 70px;
+  margin: .5rem;
+}
+
+@media (min-width: 600px) {
+  a {
+    width: 18%;
+  }
+}
+
+a:hover {
+  background-color: constants.$lightestPurple;
+}
