@@ -1,1 +1,16 @@
-<canvas id="stitchCanvas" width="700" height="700"></canvas>
+<div 
+	class="containsLayers"
+	(document:mousemove)="onMouseMoveEvent($event)">
+	<canvas 
+		class="background" 
+		width="700" 
+		height="700"></canvas>
+	<canvas 
+		id="highlightCanvas" 
+		width="700" 
+		height="700"></canvas>
+	<canvas 
+		id="gridCanvas"
+		width="700" 
+		height="700"></canvas>
+</div>

@@ -1,4 +1,13 @@
+.containsLayers {
+	display: block;
+	position: relative;
+}
+
+.background {
+	background-color: #fff;
+}
+
 canvas {
 	display: block;
-	background-color: #fff;
+	position: absolute;
 }
