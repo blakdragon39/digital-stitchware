@@ -1,14 +1,14 @@
 <div class="innerBody">
 	<span class="canvasDimension">
-		<b>Width:</b> <span *ngIf="!changingSize">{{width}}</span> 
+		<b>Width:</b> <span *ngIf="!changingSize"> {{width}}</span> 
 		<input *ngIf="changingSize" type="number" size="5" value="{{width}}" [(ngModel)]="newWidth" />
 	</span>
 	<span class="canvasDimension">
-		<b>Height:</b> <span *ngIf="!changingSize">{{height}}</span> 
+		<b>Height:</b> <span *ngIf="!changingSize"> {{height}}</span> 
 		<input *ngIf="changingSize" type="number" size="5" value="{{height}}" [(ngModel)]="newHeight" />
 	</span>
 	<button *ngIf="!changingSize" (click)="changeSize()">Change Size</button>
 	<button *ngIf="changingSize" (click)="finishChangingSize()">Done</button>
 
-	<app-canvas />
+	<app-canvas [width]="width" [height]="height"/>
 </div>

@@ -16,8 +16,8 @@ import { CanvasComponent } from './canvas/canvas.component'
     styleUrl: './creation.component.scss'
 })
 export class CreationComponent {
-    public width = 100
-    public height = 100
+    public width = 50
+    public height = 50
 
     public newWidth = 0
     public newHeight = 0
