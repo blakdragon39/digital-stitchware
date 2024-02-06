@@ -1,8 +1,13 @@
 <div 
 	class="containsLayers"
-	(document:mousemove)="onMouseMoveEvent($event)">
+	(document:mousemove)="onMouseMoveEvent($event)"
+	(click)="onMouseClickEvent($event)">
 	<canvas 
 		class="background" 
+		width="700" 
+		height="700"></canvas>
+	<canvas
+		id="fullCrossCanvas"
 		width="700" 
 		height="700"></canvas>
 	<canvas 

@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core'
 import { CommonModule } from '@angular/common'
 
 import { Point } from '../../models/point'
+import { Pattern, FullCross } from '../../models/pattern'
 
 @Component({
     selector: 'app-canvas',
@@ -23,16 +24,20 @@ export class CanvasComponent {
 
     private initialized = false
     private gridCtx!: CanvasRenderingContext2D
+    private fullCrossCtx!: CanvasRenderingContext2D
     private highlightCtx!: CanvasRenderingContext2D
     private boundingRect!: DOMRect
 
     private highlightedSquare: Point | null = null
+    private pattern: Pattern = new Pattern()
 
     ngOnInit() {
         var gridCanvas = document.getElementById('gridCanvas')!
+        var fullCrossCanvas = document.getElementById('fullCrossCanvas')!
         var highlightCanvas = document.getElementById('highlightCanvas')!
 
         this.gridCtx = (gridCanvas as HTMLCanvasElement).getContext('2d')!
+        this.fullCrossCtx = (fullCrossCanvas as HTMLCanvasElement).getContext('2d')!
         this.highlightCtx = (highlightCanvas as HTMLCanvasElement).getContext('2d')!
         this.boundingRect = gridCanvas.getBoundingClientRect()!
 
@@ -66,6 +71,13 @@ export class CanvasComponent {
         }
     }
 
+    drawPattern() {
+        this.fullCrossCtx.reset()
+        for (let fullCross of this.pattern.fullCrosses.values()) {
+            this.drawSquare(this.fullCrossCtx, new Point(fullCross.xPos, fullCross.yPos), fullCross.color)
+        }
+    }
+
     drawLine(c: CanvasRenderingContext2D, from: Point, to: Point, width: number) {
         c.beginPath()
         c.lineWidth = width
@@ -92,6 +104,13 @@ export class CanvasComponent {
         }
     }
 
+    onMouseClickEvent(event: MouseEvent) {
+        var mousePos = this.getRelativeMousePosition(event)
+        if (this.isInsideCanvas(mousePos) && this.highlightedSquare) {
+            this.setBlock(this.highlightedSquare, '#000')
+        }
+    }
+
     getRelativeMousePosition(event: MouseEvent): Point {
         return new Point(event.clientX - this.boundingRect.x, event.clientY - this.boundingRect.y)
     }
@@ -109,5 +128,10 @@ export class CanvasComponent {
         } else {
             return null
         }
+    }
+
+    setBlock(block: Point, color: string) {
+        this.pattern.fullCrosses.set(block, new FullCross(block.x, block.y, color))
+        this.drawPattern() // todo only redraw the one block?
     }
 }
