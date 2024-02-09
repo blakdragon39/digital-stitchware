@@ -31,6 +31,10 @@ export class CanvasComponent {
     private highlightedSquare: Point | null = null
     private pattern: Pattern = new Pattern()
 
+    private rightClickDown = false
+    private xOffset = 20
+    private yOffset = 20
+
     ngOnInit() {
         var gridCanvas = document.getElementById('gridCanvas')!
         var fullCrossCanvas = document.getElementById('fullCrossCanvas')!
@@ -81,13 +85,13 @@ export class CanvasComponent {
     drawLine(c: CanvasRenderingContext2D, from: Point, to: Point, width: number) {
         c.beginPath()
         c.lineWidth = width
-        c.moveTo(from.x, from.y)
-        c.lineTo(to.x, to.y)
+        c.moveTo(from.x + this.xOffset, from.y + this.yOffset)
+        c.lineTo(to.x + this.xOffset, to.y + this.yOffset)
         c.stroke()
     }
 
     drawSquare(c: CanvasRenderingContext2D, pos: Point, color: string) {
-        c.rect(pos.x * this.stitchSize, pos.y * this.stitchSize, this.stitchSize, this.stitchSize)
+        c.rect((pos.x * this.stitchSize) + this.xOffset, (pos.y * this.stitchSize) + this.yOffset, this.stitchSize, this.stitchSize)
         c.fillStyle = color
         c.fill()
     }
@@ -95,16 +99,46 @@ export class CanvasComponent {
     onMouseMoveEvent(event: MouseEvent) {
         var mousePos = this.getRelativeMousePosition(event)
         if (this.isInsideCanvas(mousePos)) {
-            var squarePos = this.getHoveredSquare(mousePos)
-            if (squarePos && this.highlightedSquare != squarePos) {
+            if (this.rightClickDown) {
+                this.xOffset += event.movementX
+                this.yOffset += event.movementY
+
                 this.highlightCtx.reset()
-                this.drawSquare(this.highlightCtx, squarePos, '#32a852')
-                this.highlightedSquare = squarePos
+                this.ngOnChanges()
+                this.drawPattern()
+            } else {
+                var squarePos = this.getHoveredSquare(mousePos)
+                if (squarePos && this.highlightedSquare != squarePos) {
+                    this.highlightCtx.reset()
+                    this.drawSquare(this.highlightCtx, squarePos, '#32a852')
+                    this.highlightedSquare = squarePos
+                }
             }
+        } else {
+            this.rightClickDown = false
         }
     }
 
     onMouseClickEvent(event: MouseEvent) {
+        if (event.button == 0) {
+            this.onLeftMouseClick(event)
+        }
+    }
+
+    onMouseDownEvent(event: MouseEvent) {
+        event.preventDefault()
+        if (event.button == 2) {
+            this.rightClickDown = true
+        }
+    }
+
+    onMouseUpEvent(event: MouseEvent) {
+        if (event.button == 2) {
+            this.rightClickDown = false
+        }
+    }
+
+    onLeftMouseClick(event: MouseEvent) {
         var mousePos = this.getRelativeMousePosition(event)
         if (this.isInsideCanvas(mousePos) && this.highlightedSquare) {
             this.setBlock(this.highlightedSquare, '#000')
@@ -112,7 +146,7 @@ export class CanvasComponent {
     }
 
     getRelativeMousePosition(event: MouseEvent): Point {
-        return new Point(event.clientX - this.boundingRect.x, event.clientY - this.boundingRect.y)
+        return new Point((event.clientX - this.boundingRect.x) - this.xOffset, (event.clientY - this.boundingRect.y) - this.yOffset)
     }
 
     isInsideCanvas(mousePos: Point) {

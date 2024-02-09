@@ -1,7 +1,10 @@
 <div 
 	class="containsLayers"
 	(document:mousemove)="onMouseMoveEvent($event)"
-	(click)="onMouseClickEvent($event)">
+	(click)="onMouseClickEvent($event)"
+	(mousedown)="onMouseDownEvent($event)"
+	(mouseup)="onMouseUpEvent($event)"
+	oncontextmenu="return false;">
 	<canvas 
 		class="background" 
 		width="700" 
