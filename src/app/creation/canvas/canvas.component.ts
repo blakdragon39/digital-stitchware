@@ -97,8 +97,7 @@ export class CanvasComponent {
     }
 
     onMouseMoveEvent(event: MouseEvent) {
-        var mousePos = this.getRelativeMousePosition(event)
-        if (this.isInsideCanvas(mousePos)) {
+        if (this.isInsideCanvas(event)) {
             if (this.rightClickDown) {
                 this.xOffset += event.movementX
                 this.yOffset += event.movementY
@@ -107,12 +106,14 @@ export class CanvasComponent {
                 this.ngOnChanges()
                 this.drawPattern()
             } else {
+                var mousePos = this.getMousePosRelativeToPattern(event)
                 var squarePos = this.getHoveredSquare(mousePos)
+
+                this.highlightCtx.reset()
                 if (squarePos && this.highlightedSquare != squarePos) {
-                    this.highlightCtx.reset()
                     this.drawSquare(this.highlightCtx, squarePos, '#32a852')
-                    this.highlightedSquare = squarePos
                 }
+                this.highlightedSquare = squarePos
             }
         } else {
             this.rightClickDown = false
@@ -120,6 +121,7 @@ export class CanvasComponent {
     }
 
     onMouseClickEvent(event: MouseEvent) {
+        // todo transfer this to onMouseDownEvent for button == 0
         if (event.button == 0) {
             this.onLeftMouseClick(event)
         }
@@ -139,25 +141,25 @@ export class CanvasComponent {
     }
 
     onLeftMouseClick(event: MouseEvent) {
-        var mousePos = this.getRelativeMousePosition(event)
-        if (this.isInsideCanvas(mousePos) && this.highlightedSquare) {
+        if (this.highlightedSquare) {
             this.setBlock(this.highlightedSquare, '#000')
         }
     }
 
-    getRelativeMousePosition(event: MouseEvent): Point {
+    getMousePosRelativeToPattern(event: MouseEvent): Point {
         return new Point((event.clientX - this.boundingRect.x) - this.xOffset, (event.clientY - this.boundingRect.y) - this.yOffset)
     }
 
-    isInsideCanvas(mousePos: Point) {
-        return mousePos.x > 0 && mousePos.x < this.boundingRect.width && mousePos.y > 0 && mousePos.y < this.boundingRect.height
+    isInsideCanvas(event: MouseEvent) {
+        return event.clientX > this.boundingRect.x && event.clientX - this.boundingRect.x < this.boundingRect.width &&
+            event.clientY > this.boundingRect.y && event.clientY - this.boundingRect.y < this.boundingRect.height
     }
 
     getHoveredSquare(mousePos: Point): Point | null {
         var x = Math.floor(mousePos.x / this.stitchSize)
         var y = Math.floor(mousePos.y / this.stitchSize)
 
-        if (x < this.width && y < this.height) {
+        if (x >= 0 && x < this.width && y >=0 &&  y < this.height) {
             return new Point(x, y)
         } else {
             return null
