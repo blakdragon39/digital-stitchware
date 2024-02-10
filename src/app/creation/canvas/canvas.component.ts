@@ -51,7 +51,97 @@ export class CanvasComponent {
 
     ngOnChanges() {
         if (!this.initialized) return
+        this.drawGridLines()
+    }
 
+    onMouseMoveEvent(event: MouseEvent) {
+        if (this.isInsideCanvas(event)) {
+            if (this.rightClickDown) {
+                this.xOffset += event.movementX
+                this.yOffset += event.movementY
+                this.redrawAll()
+            } else {
+                var mousePos = this.getMousePosRelativeToPattern(event)
+                this.highlightedSquare = this.getHoveredSquare(mousePos)
+                this.drawHighlight()
+            }
+        } else {
+            this.rightClickDown = false
+        }
+    }
+
+    onMouseClickEvent(event: MouseEvent) {
+        // todo transfer this to onMouseDownEvent for button == 0
+        if (event.button == 0) {
+            this.onLeftMouseClick(event)
+        }
+    }
+
+    onMouseDownEvent(event: MouseEvent) {
+        event.preventDefault()
+        if (event.button == 2) {
+            this.rightClickDown = true
+        }
+    }
+
+    onMouseUpEvent(event: MouseEvent) {
+        if (event.button == 2) {
+            this.rightClickDown = false
+        }
+    }
+
+    onScrollEvent(event: WheelEvent) {
+        var newStitchSize = this.stitchSize + (event.deltaY * -0.1)
+
+        if (newStitchSize > 0) {
+            this.stitchSize = newStitchSize
+            this.redrawAll()
+        }
+    }
+
+    onLeftMouseClick(event: MouseEvent) {
+        if (this.highlightedSquare) {
+            this.setBlock(this.highlightedSquare, '#000')
+        }
+    }
+
+    getMousePosRelativeToPattern(event: MouseEvent): Point {
+        return new Point((event.clientX - this.boundingRect.x) - this.xOffset, (event.clientY - this.boundingRect.y) - this.yOffset)
+    }
+
+    isInsideCanvas(event: MouseEvent) {
+        return event.clientX > this.boundingRect.x && event.clientX - this.boundingRect.x < this.boundingRect.width &&
+            event.clientY > this.boundingRect.y && event.clientY - this.boundingRect.y < this.boundingRect.height
+    }
+
+    getHoveredSquare(mousePos: Point): Point | null {
+        var x = Math.floor(mousePos.x / this.stitchSize)
+        var y = Math.floor(mousePos.y / this.stitchSize)
+
+        if (x >= 0 && x < this.width && y >=0 &&  y < this.height) {
+            return new Point(x, y)
+        } else {
+            return null
+        }
+    }
+
+    setBlock(block: Point, color: string) {
+        this.pattern.fullCrosses.set(block, new FullCross(block.x, block.y, color))
+        this.drawPattern() // todo only redraw the one block?
+    }
+
+
+    ///////////////////////////////
+    // Draw canvas  ///////////////
+    ///////////////////////////////
+
+    redrawAll() {
+        this.drawGridLines()
+        this.drawPattern()
+        this.drawHighlight()
+    }
+
+    drawGridLines() {
         this.gridCtx.reset()
 
         // draw full outer outline
@@ -96,78 +186,10 @@ export class CanvasComponent {
         c.fill()
     }
 
-    onMouseMoveEvent(event: MouseEvent) {
-        if (this.isInsideCanvas(event)) {
-            if (this.rightClickDown) {
-                this.xOffset += event.movementX
-                this.yOffset += event.movementY
-
-                this.highlightCtx.reset()
-                this.ngOnChanges()
-                this.drawPattern()
-            } else {
-                var mousePos = this.getMousePosRelativeToPattern(event)
-                var squarePos = this.getHoveredSquare(mousePos)
-
-                this.highlightCtx.reset()
-                if (squarePos && this.highlightedSquare != squarePos) {
-                    this.drawSquare(this.highlightCtx, squarePos, '#32a852')
-                }
-                this.highlightedSquare = squarePos
-            }
-        } else {
-            this.rightClickDown = false
-        }
-    }
-
-    onMouseClickEvent(event: MouseEvent) {
-        // todo transfer this to onMouseDownEvent for button == 0
-        if (event.button == 0) {
-            this.onLeftMouseClick(event)
-        }
-    }
-
-    onMouseDownEvent(event: MouseEvent) {
-        event.preventDefault()
-        if (event.button == 2) {
-            this.rightClickDown = true
-        }
-    }
-
-    onMouseUpEvent(event: MouseEvent) {
-        if (event.button == 2) {
-            this.rightClickDown = false
-        }
-    }
-
-    onLeftMouseClick(event: MouseEvent) {
+    drawHighlight() {
+        this.highlightCtx.reset()
         if (this.highlightedSquare) {
-            this.setBlock(this.highlightedSquare, '#000')
+            this.drawSquare(this.highlightCtx, this.highlightedSquare, '#32a852')
         }
-    }
-
-    getMousePosRelativeToPattern(event: MouseEvent): Point {
-        return new Point((event.clientX - this.boundingRect.x) - this.xOffset, (event.clientY - this.boundingRect.y) - this.yOffset)
-    }
-
-    isInsideCanvas(event: MouseEvent) {
-        return event.clientX > this.boundingRect.x && event.clientX - this.boundingRect.x < this.boundingRect.width &&
-            event.clientY > this.boundingRect.y && event.clientY - this.boundingRect.y < this.boundingRect.height
-    }
-
-    getHoveredSquare(mousePos: Point): Point | null {
-        var x = Math.floor(mousePos.x / this.stitchSize)
-        var y = Math.floor(mousePos.y / this.stitchSize)
-
-        if (x >= 0 && x < this.width && y >=0 &&  y < this.height) {
-            return new Point(x, y)
-        } else {
-            return null
-        }
-    }
-
-    setBlock(block: Point, color: string) {
-        this.pattern.fullCrosses.set(block, new FullCross(block.x, block.y, color))
-        this.drawPattern() // todo only redraw the one block?
     }
 }
