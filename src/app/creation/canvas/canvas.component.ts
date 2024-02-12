@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core'
+import { Component, Input, SimpleChanges } from '@angular/core'
 import { CommonModule } from '@angular/common'
 
 import { Point } from '../../models/point'
@@ -14,6 +14,7 @@ import { Pattern, FullCross } from '../../models/pattern'
     styleUrl: './canvas.component.scss'
 })
 export class CanvasComponent {
+    @Input() public color = "#000000"
     @Input() public width = 0
     @Input() public height = 0
 
@@ -36,22 +37,24 @@ export class CanvasComponent {
     private yOffset = 20
 
     ngOnInit() {
-        var gridCanvas = document.getElementById('gridCanvas')!
-        var fullCrossCanvas = document.getElementById('fullCrossCanvas')!
-        var highlightCanvas = document.getElementById('highlightCanvas')!
+        var gridCanvas = document.getElementById('gridCanvas') as HTMLCanvasElement
+        var fullCrossCanvas = document.getElementById('fullCrossCanvas') as HTMLCanvasElement
+        var highlightCanvas = document.getElementById('highlightCanvas') as HTMLCanvasElement
 
-        this.gridCtx = (gridCanvas as HTMLCanvasElement).getContext('2d')!
-        this.fullCrossCtx = (fullCrossCanvas as HTMLCanvasElement).getContext('2d')!
-        this.highlightCtx = (highlightCanvas as HTMLCanvasElement).getContext('2d')!
+        this.gridCtx = gridCanvas.getContext('2d')!
+        this.fullCrossCtx = fullCrossCanvas.getContext('2d')!
+        this.highlightCtx = highlightCanvas.getContext('2d')!
         this.boundingRect = gridCanvas.getBoundingClientRect()!
 
-        this.initialized = true        
-        this.ngOnChanges()
+        this.initialized = true
+        this.drawGridLines()
     }
 
-    ngOnChanges() {
+    ngOnChanges(changes: SimpleChanges) {
         if (!this.initialized) return
-        this.drawGridLines()
+        if ('width' in changes || 'height' in changes) {
+            this.drawGridLines()
+        }
     }
 
     onMouseMoveEvent(event: MouseEvent) {
@@ -101,7 +104,7 @@ export class CanvasComponent {
 
     onLeftMouseClick(event: MouseEvent) {
         if (this.highlightedSquare) {
-            this.setBlock(this.highlightedSquare, '#000')
+            this.setBlock(this.highlightedSquare, this.color)
         }
     }
 
@@ -172,6 +175,13 @@ export class CanvasComponent {
         }
     }
 
+    drawHighlight() {
+        this.highlightCtx.reset()
+        if (this.highlightedSquare) {
+            this.drawSquare(this.highlightCtx, this.highlightedSquare, '#32a852')
+        }
+    }
+
     drawLine(c: CanvasRenderingContext2D, from: Point, to: Point, width: number) {
         c.beginPath()
         c.lineWidth = width
@@ -181,15 +191,9 @@ export class CanvasComponent {
     }
 
     drawSquare(c: CanvasRenderingContext2D, pos: Point, color: string) {
+        c.beginPath()
         c.rect((pos.x * this.stitchSize) + this.xOffset, (pos.y * this.stitchSize) + this.yOffset, this.stitchSize, this.stitchSize)
         c.fillStyle = color
         c.fill()
-    }
-
-    drawHighlight() {
-        this.highlightCtx.reset()
-        if (this.highlightedSquare) {
-            this.drawSquare(this.highlightCtx, this.highlightedSquare, '#32a852')
-        }
     }
 }

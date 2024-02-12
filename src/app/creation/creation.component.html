@@ -10,5 +10,13 @@
 	<button *ngIf="!changingSize" (click)="changeSize()">Change Size</button>
 	<button *ngIf="changingSize" (click)="finishChangingSize()">Done</button>
 
-	<app-canvas [width]="width" [height]="height" />
+	<app-color-picker 
+		class="creationColor" 
+		[startColor]="color" 
+		[onColorChange]="onColorChange" />
+	<app-canvas 
+		[color]="color"
+		[width]="width" 
+		[height]="height" />
+	
 </div>

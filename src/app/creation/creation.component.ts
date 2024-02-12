@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 
 import { CanvasComponent } from './canvas/canvas.component'
+import { ColorPickerComponent } from './colorpicker/colorpicker.component'
 
 @Component({
     selector: 'app-creation',
@@ -11,6 +12,7 @@ import { CanvasComponent } from './canvas/canvas.component'
         CommonModule,
         FormsModule,
         CanvasComponent,
+        ColorPickerComponent,
     ],
     templateUrl: './creation.component.html',
     styleUrl: './creation.component.scss'
@@ -18,11 +20,16 @@ import { CanvasComponent } from './canvas/canvas.component'
 export class CreationComponent {
     public width = 10
     public height = 10
+    public color = "#00ff00"
 
     public newWidth = 0
     public newHeight = 0
 
     public changingSize = false
+
+    onColorChange = (event: Event) => {
+        this.color = (event.target as HTMLInputElement).value
+    } 
 
     changeSize() {
         this.newWidth = this.width
